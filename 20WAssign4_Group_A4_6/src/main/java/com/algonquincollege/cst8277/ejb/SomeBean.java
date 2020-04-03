@@ -11,6 +11,8 @@ package com.algonquincollege.cst8277.ejb;
  * TODO - rename and add necessary behaviours to access EmployeeSystem entities
  *
  */
+
+/* This is the test of my code commit in github */
 public class SomeBean {
 
 }
