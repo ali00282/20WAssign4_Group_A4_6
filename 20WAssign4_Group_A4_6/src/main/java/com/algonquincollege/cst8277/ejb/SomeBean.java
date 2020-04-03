@@ -12,7 +12,7 @@ package com.algonquincollege.cst8277.ejb;
  *
  */
 
-/* This is the test of my code commit in github */
+/* This is the test of my code commit in github  */
 public class SomeBean {
 
 }
