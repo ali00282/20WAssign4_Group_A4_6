@@ -7,12 +7,19 @@
  */
 package com.algonquincollege.cst8277.ejb;
 
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 /**
  * TODO - rename and add necessary behaviours to access EmployeeSystem entities
  *
  */
 
 /* This is the test of my code commit in github  */
-public class SomeBean {
+@Stateless
+public class EmployeeBean {
 
+    @PersistenceContext(unitName = "assignment4-PU")
+    protected EntityManager em;
 }
