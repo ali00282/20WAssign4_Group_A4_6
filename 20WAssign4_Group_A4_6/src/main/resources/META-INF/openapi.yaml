@@ -5,8 +5,14 @@ info:
   version: "1.0.0"
   title: "(20W) Assignment 4 - Employee System"
 servers:
-  - url: http://localhost:8080/rest-employeeSystem/api/v1
-
+  - url: 'http://localhost:{port}/{contextRoot}/{basePath}'
+    variables:
+      contextRoot:
+         default: 'rest-employeeSystem'
+      basePath:
+        default: 'api/v1'
+      port:
+        default: '9090'
 components:
   securitySchemes:
     basicAuth:

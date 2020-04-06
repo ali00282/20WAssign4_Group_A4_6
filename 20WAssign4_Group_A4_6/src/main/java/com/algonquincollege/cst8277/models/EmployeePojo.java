@@ -34,9 +34,12 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import static com.algonquincollege.cst8277.models.EmployeePojo.ALL_EMPLOYEES_QUERY_NAME;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -51,9 +54,14 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 @Entity(name = "Employee")
 @Table(name = "EMPLOYEE")
 @AttributeOverride(name = "id", column = @Column(name = "EMP_ID"))
+@NamedQueries(
+    @NamedQuery(name=ALL_EMPLOYEES_QUERY_NAME, query = "select e from Employee e")
+)
 public class EmployeePojo extends PojoBase implements Serializable {
     /** explicit set serialVersionUID */
     private static final long serialVersionUID = 1L;
+    public static final String ALL_EMPLOYEES_QUERY_NAME =
+        "allEmployees";
 
     protected String firstName;
     protected String lastName;
