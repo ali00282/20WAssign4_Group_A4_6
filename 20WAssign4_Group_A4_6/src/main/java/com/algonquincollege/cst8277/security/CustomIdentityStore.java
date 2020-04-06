@@ -31,7 +31,7 @@ import com.algonquincollege.cst8277.models.SecurityUser;
 public class CustomIdentityStore implements IdentityStore {
 
     @Inject
-    protected CustomIdentityStoreJPAHelper jpaHelper;
+     protected CustomIdentityStoreJPAHelper jpaHelper;
 
     @Inject
     protected Pbkdf2PasswordHash pbAndjPasswordHash;
