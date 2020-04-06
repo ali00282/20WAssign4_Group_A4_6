@@ -1,0 +1,113 @@
+#https://app.swaggerhub.com/help/tutorials/openapi-3-tutorial
+openapi: 3.0.0
+info:
+  description: "This is the REST 'contract' for the Employee System"
+  version: "1.0.0"
+  title: "(20W) Assignment 4 - Employee System"
+servers:
+  - url: http://localhost:8080/rest-employeeSystem/api/v1
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+  
+  responses:
+    UnauthorizedAdminError:
+      description: request requires HTTP authentication for ADMIN_ROLE
+    UnauthorizedUserError:
+      description: request requires HTTP authentication for USER_ROLE
+    NotFound:
+      description: The specified resource was not found
+  
+  schemas:
+  
+    Employee:
+      description: (20W) Assignment 4 - EmployeeSystem employee
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          description: ID of  entity
+          type: integer
+        version:
+          description: version (OptLock) of entity
+          type: integer
+        createdDate:
+          description: creation timestamp of entity
+          type: string
+          format: date-time
+        updatedDate:
+          description: last-update timestamp of entity
+          type: string
+          format: date-time
+        firstName:
+          type: string
+          description: First Name of the employee
+          example: 'John'
+        lastName:
+          type: string
+          description: Last Name of the employee
+          example: 'Doe'
+        email:
+          type: string
+          description: Email of the employee
+          example: 'John.Doe@gmail.com'
+        title:
+          type: string
+          description: Title of the employee
+          example: 'Prof.'
+        salary:
+          type: number
+          format: double
+          description: Salary of the employee
+          example: 100.0
+        # additional for Address/Phone/Project/EmployeeTasks      
+
+    EmployeesList:
+        description: list of employees
+        type: object
+        properties:
+          employees:
+            type: array
+            items:
+              $ref: '#/components/schemas/Employee'
+
+security:
+  - basicAuth: []
+  
+paths:
+  /employees:
+    get:
+      responses:
+        401:
+           $ref: '#/components/responses/UnauthorizedAdminError'
+        200:      
+          description: OK
+          content:
+            application/json:
+             schema: 
+               $ref: '#/components/schemas/EmployeesList'
+  /employees/{id}:
+    get:
+      summary: Retrieves an employee by its id
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: numeric id of the employee to retrieve
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+        401:
+          $ref: '#/components/responses/UnauthorizedUserError'
+        404:
+          $ref: '#/components/responses/NotFound'
