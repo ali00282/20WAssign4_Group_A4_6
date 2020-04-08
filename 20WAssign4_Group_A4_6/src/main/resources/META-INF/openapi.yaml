@@ -52,7 +52,7 @@ components:
       description: list of phones
       type: object
       properties:
-        employees:
+        phones:
           type: array
           items:
             $ref: '#/components/schemas/Phone'
@@ -73,19 +73,19 @@ components:
         city:
           description: city
           type: string
-          example: NewCity
+          example: "NewCity"
         state:
           description: state
           type: string
-          example: AA
+          example: "AA"
         country:
           description: country
           type: string
-          example: New Country
+          example: "New Country"
         postal:
           description: postal code
           type: string
-          example: AAA BBB
+          example: "AAA BBB"
     Employee:
       description: (20W) Assignment 4 - EmployeeSystem employee
       type: object
@@ -127,6 +127,10 @@ components:
           format: double
           description: Salary of the employee
           example: 100.0
+        address:
+          $ref: '#/components/schemas/Address'
+        phones:
+          $ref: '#/components/schemas/PhoneList'
         # additional for Address/Phone/Project/EmployeeTasks      
     EmployeesList:
       description: list of employees

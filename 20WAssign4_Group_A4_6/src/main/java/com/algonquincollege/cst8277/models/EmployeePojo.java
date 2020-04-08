@@ -154,7 +154,7 @@ public class EmployeePojo extends PojoBase implements Serializable {
      * This is a one to one relation in database between Employee and Address
      * tables.
      */
-    @OneToOne
+    @OneToOne(cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "ADDR_ID")
     public AddressPojo getAddress() {
         return Address;
