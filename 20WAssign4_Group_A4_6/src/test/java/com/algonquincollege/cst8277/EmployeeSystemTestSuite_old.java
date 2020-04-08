@@ -58,7 +58,7 @@ public class EmployeeSystemTestSuite_old {
         logger.debug("oneTimeTearDown");
     }
     
-    // TODO - create 40 test-cases that send GET/PUT/POST/DELETE messages
+    // - create 40 test-cases that send GET/PUT/POST/DELETE messages
     // to REST'ful endpoints for the EmployeeSystem entities using the JAX-RS
     // ClientBuilder APIs
     
