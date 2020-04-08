@@ -28,7 +28,6 @@ import static com.algonquincollege.cst8277.utils.MyConstants.*;
 public class EmployeeResource {
     @EJB
     protected EmployeeBean eBean;
-    
     @Inject
     protected SecurityContext sc;
 
@@ -38,25 +37,21 @@ public class EmployeeResource {
         return Response.ok(eBean.findAllEmployees()).build();
     }
 
-    @RolesAllowed({USER_ROLE})
+    @RolesAllowed({ADMIN_ROLE,USER_ROLE})
     @GET
     @Path("{userId}")
-    public Response getByUserId(@PathParam("userId")
-    int userId) {
-    Response response = null;
-    WrappingCallerPrincipal wCallerPrincipal =
-    (WrappingCallerPrincipal)sc.getCallerPrincipal();
-    SecurityUser sUser =     (SecurityUser)wCallerPrincipal.getWrapped();
-    EmployeePojo e = sUser.getEmployee();
-    if (e.getId() != userId) {
-    throw new ForbiddenException(    "User trying to access resource it does not own" +
-    "(wrong userid)");
-    } else
-    return Response.ok(eBean.findEmployeeById(userId)).build();
-    
+    public Response getByUserId(@PathParam("userId") int userId) {
+        Response response = null;
+        WrappingCallerPrincipal wCallerPrincipal = (WrappingCallerPrincipal)sc.getCallerPrincipal();
+        SecurityUser sUser = (SecurityUser)wCallerPrincipal.getWrapped();
+        EmployeePojo e = sUser.getEmployee();
+        if (e != null && e.getId() != userId) {
+            throw new ForbiddenException("User trying to access resource it does not own" + "(wrong userid)");
+        }
+        else
+            return Response.ok(eBean.findEmployeeById(userId)).build();
     }
 
-    
     @RolesAllowed(ADMIN_ROLE)
     @POST
     @Path("/add")
@@ -64,7 +59,7 @@ public class EmployeeResource {
         eBean.addEmployee(emp);
         return Response.ok().build();
     }
-    
+
     @RolesAllowed(ADMIN_ROLE)
     @POST
     @Path("/update")
@@ -72,7 +67,7 @@ public class EmployeeResource {
         eBean.updateEmployee(emp);
         return Response.ok().build();
     }
-    
+
     @RolesAllowed(ADMIN_ROLE)
     @GET
     @Path("/delete/{id}")
@@ -80,5 +75,4 @@ public class EmployeeResource {
         eBean.deleteEmployeeById(empId);
         return Response.ok().build();
     }
-    
 }
