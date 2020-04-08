@@ -60,6 +60,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 public class EmployeePojo extends PojoBase implements Serializable {
     /** explicit set serialVersionUID */
     private static final long serialVersionUID = 1L;
+
     public static final String ALL_EMPLOYEES_QUERY_NAME =
         "allEmployees";
 

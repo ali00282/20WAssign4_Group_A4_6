@@ -5,8 +5,14 @@ info:
   version: "1.0.0"
   title: "(20W) Assignment 4 - Employee System"
 servers:
-  - url: http://localhost:8080/rest-employeeSystem/api/v1
-
+  - url: 'http://localhost:{port}/{contextRoot}/{basePath}'
+    variables:
+      contextRoot:
+         default: 'make-progress'
+      basePath:
+        default: 'api/v1'
+      port:
+        default: '8080'
 components:
   securitySchemes:
     basicAuth:
@@ -22,7 +28,64 @@ components:
       description: The specified resource was not found
   
   schemas:
-  
+    Phone:
+      description: Employee Phone
+      type: object
+      required:
+        - phoneType
+        - areacode
+        - phoneNumber
+      properties:
+        phoneType:
+          description: Type of phone
+          type: string
+          example: H or W or M
+        areacode:
+          description: Area code of phone
+          type: string
+          example: 613
+        phoneNumber:
+          description: Number of phone
+          type: string
+          example: 123 4567
+    PhoneList:
+        description: list of phones
+        type: object
+        properties:
+          employees:
+            type: array
+            items:
+              $ref: '#/components/schemas/Phone'
+    Address:
+      description: Employee Address
+      type: object
+      required:
+        - street
+        - city
+        - state
+        - country
+        - postal
+      properties:
+        street:
+          description: street
+          type: string
+          example: "123 Garbage Place"
+        city:
+          description: city
+          type: string
+          example: NewCity
+        state:
+          description: state
+          type: string
+          example: AA
+        country:
+          description: country
+          type: string
+          example: New Country
+        postal:
+          description: postal code
+          type: string
+          example: AAA BBB
     Employee:
       description: (20W) Assignment 4 - EmployeeSystem employee
       type: object
@@ -65,7 +128,6 @@ components:
           description: Salary of the employee
           example: 100.0
         # additional for Address/Phone/Project/EmployeeTasks      
-
     EmployeesList:
         description: list of employees
         type: object
@@ -101,6 +163,27 @@ paths:
           required: true
           description: numeric id of the employee to retrieve
       responses:
+        200: 
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+        401:
+          $ref: '#/components/responses/UnauthorizedUserError'
+        404:
+          $ref: '#/components/responses/NotFound'
+  /employees/delete/{id}:
+    get:
+      summary: Deletes an employee by its id
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: numeric id of the employee to delete
+      responses:
         200:
           description: OK
           content:
@@ -111,3 +194,45 @@ paths:
           $ref: '#/components/responses/UnauthorizedUserError'
         404:
           $ref: '#/components/responses/NotFound'
+  /employees/add:
+    post:
+      summary: Adds an employee 
+      parameters:
+        - in: path
+          name: emp
+          schema:
+            type: object
+          required: true
+          description: Employee object
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+        401:
+          $ref: '#/components/responses/UnauthorizedUserError'
+        404:
+          $ref: '#/components/responses/NotFound'          
+  /employees/update:
+    post:
+      summary: Update an employee 
+      parameters:
+        - in: path
+          name: emp
+          schema:
+            type: object
+          required: true
+          description: Employee object
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employee'
+        401:
+          $ref: '#/components/responses/UnauthorizedUserError'
+        404:
+          $ref: '#/components/responses/NotFound'                              

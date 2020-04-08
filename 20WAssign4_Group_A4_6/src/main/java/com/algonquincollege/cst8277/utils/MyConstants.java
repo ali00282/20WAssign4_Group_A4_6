@@ -28,7 +28,7 @@ public interface MyConstants {
     //REST constants
     public static final String SLASH = "/";
     public static final String APPLICATION_API_VERSION = SLASH + "api" + SLASH + "v1";
-    public static final String APPLICATION_CONTEXT_ROOT = SLASH + "rest-employeeSystem";
+    public static final String APPLICATION_CONTEXT_ROOT = SLASH + "make-progress";
     public static final String EMPLOYEE_RESOURCE_PATH_ID_ELEMENT =  "id";
     public static final String EMPLOYEE_RESOURCE_PATH_ID_PATH =  "/{" + EMPLOYEE_RESOURCE_PATH_ID_ELEMENT + "}";
     public static final String EMPLOYEE_RESOURCE_NAME =  "employees";
