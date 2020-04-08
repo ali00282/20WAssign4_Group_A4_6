@@ -49,13 +49,13 @@ components:
           type: string
           example: 123 4567
     PhoneList:
-        description: list of phones
-        type: object
-        properties:
-          employees:
-            type: array
-            items:
-              $ref: '#/components/schemas/Phone'
+      description: list of phones
+      type: object
+      properties:
+        employees:
+          type: array
+          items:
+            $ref: '#/components/schemas/Phone'
     Address:
       description: Employee Address
       type: object
@@ -129,13 +129,13 @@ components:
           example: 100.0
         # additional for Address/Phone/Project/EmployeeTasks      
     EmployeesList:
-        description: list of employees
-        type: object
-        properties:
-          employees:
-            type: array
-            items:
-              $ref: '#/components/schemas/Employee'
+      description: list of employees
+      type: object
+      properties:
+        employees:
+          type: array
+          items:
+            $ref: '#/components/schemas/Employee'
 
 security:
   - basicAuth: []
@@ -196,17 +196,16 @@ paths:
           $ref: '#/components/responses/NotFound'
   /employees/add:
     post:
-      summary: Adds an employee 
-      parameters:
-        - in: path
-          name: emp
-          schema:
-            type: object
-          required: true
-          description: Employee object
+      description: Adds an employee 
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Employee'
       responses:
         200:
-          description: OK
+          description: Successfully created Employee
           content:
             application/json:
               schema:
@@ -217,17 +216,16 @@ paths:
           $ref: '#/components/responses/NotFound'          
   /employees/update:
     post:
-      summary: Update an employee 
-      parameters:
-        - in: path
-          name: emp
-          schema:
-            type: object
-          required: true
-          description: Employee object
+      description: Updates an employee 
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Employee'
       responses:
         200:
-          description: OK
+          description: Successfully updated Employee
           content:
             application/json:
               schema:
@@ -235,4 +233,4 @@ paths:
         401:
           $ref: '#/components/responses/UnauthorizedUserError'
         404:
-          $ref: '#/components/responses/NotFound'                              
+          $ref: '#/components/responses/NotFound'
