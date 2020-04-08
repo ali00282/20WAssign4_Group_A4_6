@@ -1,7 +1,7 @@
 insert into SECURITY_ROLE values(2, 'ADMIN_ROLE');
 insert into SECURITY_ROLE values(1, 'USER_ROLE');
 
-INSERT INTO EMPLOYEE values(1,NULL,NULL,'user1.assignment@test.com', 'user1', 'assignment', 123.0,'test user 1', 1, NULL);
+--INSERT INTO EMPLOYEE values(1,NULL,NULL,'user1.assignment@test.com', 'user1', 'assignment', 123.0,'test user 1', 1, NULL);
 INSERT INTO EMPLOYEE values(2,NULL,NULL,'user2.assignment@test.com', 'user2', 'assignment', 123.0,'test user 2', 1, NULL);
 INSERT INTO EMPLOYEE values(3,NULL,NULL,'user3.assignment@test.com', 'user3', 'assignment', 123.0,'test user 3', 1, NULL);
 

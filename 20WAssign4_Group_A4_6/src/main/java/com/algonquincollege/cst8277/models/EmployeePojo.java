@@ -41,7 +41,9 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import static com.algonquincollege.cst8277.models.EmployeePojo.ALL_EMPLOYEES_QUERY_NAME;
 
+import com.algonquincollege.cst8277.rest.HollowProjectsSerializer;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * The Employee class demonstrates several JPA features:
@@ -178,6 +180,7 @@ public class EmployeePojo extends PojoBase implements Serializable {
 
     @ManyToMany
     @JoinTable(name = "EMP_PROJ", joinColumns = @JoinColumn(name = "EMP_ID", referencedColumnName = "EMP_ID"), inverseJoinColumns = @JoinColumn(name = "PROJ_ID", referencedColumnName = "PROJ_ID"))
+    @JsonSerialize(using = HollowProjectsSerializer.class)
     public Set<ProjectPojo> getProjects() {
         return projects;
     }
