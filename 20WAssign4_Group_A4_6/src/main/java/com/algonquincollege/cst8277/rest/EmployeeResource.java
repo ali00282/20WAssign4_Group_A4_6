@@ -38,13 +38,24 @@ public class EmployeeResource {
         return Response.ok(eBean.findAllEmployees()).build();
     }
 
-    @RolesAllowed(ADMIN_ROLE)
+    @RolesAllowed({USER_ROLE})
     @GET
-    @Path("/{id}")
-    public Response getByEmployeeId(@PathParam("id") int empId) {
-        
-        return Response.ok(eBean.findEmployeeById(empId)).build();
+    @Path("{userId}")
+    public Response getByUserId(@PathParam("userId")
+    int userId) {
+    Response response = null;
+    WrappingCallerPrincipal wCallerPrincipal =
+    (WrappingCallerPrincipal)sc.getCallerPrincipal();
+    SecurityUser sUser =     (SecurityUser)wCallerPrincipal.getWrapped();
+    EmployeePojo e = sUser.getEmployee();
+    if (e.getId() != userId) {
+    throw new ForbiddenException(    "User trying to access resource it does not own" +
+    "(wrong userid)");
+    } else
+    return Response.ok(eBean.findEmployeeById(userId)).build();
+    
     }
+
     
     @RolesAllowed(ADMIN_ROLE)
     @POST
