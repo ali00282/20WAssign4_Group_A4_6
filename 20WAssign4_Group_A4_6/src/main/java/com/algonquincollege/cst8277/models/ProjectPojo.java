@@ -27,8 +27,11 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
- * Project class 
+ * Project class
  */
 @Entity(name="Project")
 @Table(name= "PROJECT")
@@ -62,7 +65,7 @@ public class ProjectPojo extends PojoBase implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
-
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @ManyToMany(mappedBy="projects")
     public List<EmployeePojo> getEmployees() {
         return employees;
