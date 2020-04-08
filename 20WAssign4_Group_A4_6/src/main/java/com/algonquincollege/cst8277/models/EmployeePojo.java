@@ -54,16 +54,11 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 @Entity(name = "Employee")
 @Table(name = "EMPLOYEE")
 @AttributeOverride(name = "id", column = @Column(name = "EMP_ID"))
-@NamedQueries(
-    @NamedQuery(name=ALL_EMPLOYEES_QUERY_NAME, query = "select e from Employee e")
-)
+@NamedQueries(@NamedQuery(name = ALL_EMPLOYEES_QUERY_NAME, query = "select e from Employee e"))
 public class EmployeePojo extends PojoBase implements Serializable {
     /** explicit set serialVersionUID */
     private static final long serialVersionUID = 1L;
-
-    public static final String ALL_EMPLOYEES_QUERY_NAME =
-        "allEmployees";
-
+    public static final String ALL_EMPLOYEES_QUERY_NAME = "allEmployees";
     protected String firstName;
     protected String lastName;
     protected String email;
@@ -73,7 +68,7 @@ public class EmployeePojo extends PojoBase implements Serializable {
     protected List<EmployeeTask> employeeTasks = new ArrayList<>();
     protected List<PhonePojo> phones = new ArrayList<>();
     protected Set<ProjectPojo> projects = new HashSet<>();
-   
+
     public EmployeePojo() {
         super();
     }
@@ -87,7 +82,8 @@ public class EmployeePojo extends PojoBase implements Serializable {
     }
 
     /**
-     * @param firstName new value for firstName
+     * @param firstName
+     *            new value for firstName
      */
     public void setFirstName(String firstName) {
         this.firstName = firstName;
@@ -102,7 +98,8 @@ public class EmployeePojo extends PojoBase implements Serializable {
     }
 
     /**
-     * @param lastName new value for lastName
+     * @param lastName
+     *            new value for lastName
      */
     public void setLastName(String lastName) {
         this.lastName = lastName;
@@ -116,7 +113,8 @@ public class EmployeePojo extends PojoBase implements Serializable {
     }
 
     /**
-     * @param email new value for email
+     * @param email
+     *            new value for email
      */
     public void setEmail(String email) {
         this.email = email;
@@ -130,7 +128,8 @@ public class EmployeePojo extends PojoBase implements Serializable {
     }
 
     /**
-     * @param title new value for title
+     * @param title
+     *            new value for title
      */
     public void setTitle(String title) {
         this.title = title;
@@ -144,7 +143,8 @@ public class EmployeePojo extends PojoBase implements Serializable {
     }
 
     /**
-     * @param salary new value for salary
+     * @param salary
+     *            new value for salary
      */
     public void setSalary(Double salary) {
         this.salary = salary;
@@ -154,7 +154,7 @@ public class EmployeePojo extends PojoBase implements Serializable {
      * This is a one to one relation in database between Employee and Address
      * tables.
      */
-    @OneToOne(cascade={CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(name = "ADDR_ID")
     public AddressPojo getAddress() {
         return Address;
@@ -165,7 +165,8 @@ public class EmployeePojo extends PojoBase implements Serializable {
     }
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "owingEmployee", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "owingEmployee", cascade = {CascadeType.PERSIST, CascadeType.MERGE,
+        CascadeType.REMOVE}, orphanRemoval = true)
     @JoinColumn(name = "PHONE_ID")
     public List<PhonePojo> getPhones() {
         return phones;
@@ -176,9 +177,7 @@ public class EmployeePojo extends PojoBase implements Serializable {
     }
 
     @ManyToMany
-    @JoinTable(name = "EMP_PROJ",
-    joinColumns = @JoinColumn(name = "EMP_ID", referencedColumnName = "EMP_ID"),
-    inverseJoinColumns = @JoinColumn(name="PROJ_ID", referencedColumnName = "PROJ_ID"))
+    @JoinTable(name = "EMP_PROJ", joinColumns = @JoinColumn(name = "EMP_ID", referencedColumnName = "EMP_ID"), inverseJoinColumns = @JoinColumn(name = "PROJ_ID", referencedColumnName = "PROJ_ID"))
     public Set<ProjectPojo> getProjects() {
         return projects;
     }
@@ -188,13 +187,12 @@ public class EmployeePojo extends PojoBase implements Serializable {
     }
 
     @ElementCollection
-    @CollectionTable(name="EMPLOYEE_TASKS", joinColumns = @JoinColumn(name="OWNING_EMP_ID"))
+    @CollectionTable(name = "EMPLOYEE_TASKS", joinColumns = @JoinColumn(name = "OWNING_EMP_ID"))
     @AttributeOverrides({
-        @AttributeOverride(name="description", column = @Column(name="TASK_DESCRIPTION")),
-        @AttributeOverride(name="task_start", column = @Column(name="TASK_START")),
-        @AttributeOverride(name="task_end_date", column = @Column(name="TASK_END_DATE")),
-        @AttributeOverride(name="task_done", column = @Column(name="TASK_DONE"))
-    })
+        @AttributeOverride(name = "description", column = @Column(name = "TASK_DESCRIPTION")),
+        @AttributeOverride(name = "task_start", column = @Column(name = "TASK_START")),
+        @AttributeOverride(name = "task_end_date", column = @Column(name = "TASK_END_DATE")),
+        @AttributeOverride(name = "task_done", column = @Column(name = "TASK_DONE"))})
     public List<EmployeeTask> getEmployeeTask() {
         return employeeTasks;
     }
@@ -202,7 +200,4 @@ public class EmployeePojo extends PojoBase implements Serializable {
     public void setEmployeeTask(List<EmployeeTask> employeeTasks) {
         this.employeeTasks = employeeTasks;
     }
-    
-    
-
 }

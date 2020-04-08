@@ -50,12 +50,9 @@ components:
           example: 123 4567
     PhoneList:
       description: list of phones
-      type: object
-      properties:
-        phones:
-          type: array
-          items:
-            $ref: '#/components/schemas/Phone'
+      type: array
+      items:
+        $ref: '#/components/schemas/Phone'
     Address:
       description: Employee Address
       type: object
