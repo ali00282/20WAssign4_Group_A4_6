@@ -70,7 +70,7 @@ public class EmployeeSystemTestSuite {
     static final String DEFAULT_ADMIN_USER = "admin";
     static final String DEFAULT_ADMIN_USER_PW = "admin";
     static final String DEFAULT_USER = "user1";
-    static final String DEFAULT_USER_PW = "admin";
+    static final String DEFAULT_USER_PW = "user1";
     
     static final String EMP_RESOURCE =
         //some JAX-RS resource the 'admin' user has security privileges to invokd
@@ -91,17 +91,12 @@ public class EmployeeSystemTestSuite {
         logger.debug("oneTimeSetUp");
         feature = HttpAuthenticationFeature.basic("admin", "admin");
         adminAuth = feature;
-        userAuth = HttpAuthenticationFeature.basic("user1", "password");
+        userAuth = HttpAuthenticationFeature.basic("user1", "admin");
         
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
         uri = UriBuilder.fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION).scheme(HTTP_SCHEMA)
             .host(HOST).port(PORT).build();
-        adminAuth = HttpAuthenticationFeature.basic(DEFAULT_ADMIN_USER, DEFAULT_ADMIN_USER_PW);
-        userAuth = HttpAuthenticationFeature.basic(DEFAULT_USER, DEFAULT_USER_PW);
-        
-        
-        
     }
 
     @AfterClass
@@ -237,6 +232,12 @@ public class EmployeeSystemTestSuite {
     
     @Test
     public void test05_test_addEmp() {
+        String suffix = "-1";
+        createTestEmployee(suffix);
+    }
+
+    private String createTestEmployee(String suffix) {
+        logger.debug("Creating emp with suffix:" + suffix);
         Client client = ClientBuilder.newClient();
         URI uri = UriBuilder
             .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
@@ -252,9 +253,9 @@ public class EmployeeSystemTestSuite {
             .request(APPLICATION_JSON).toString());
         
         EmployeePojo emp = new EmployeePojo();
-        emp.setFirstName("JunitUser");
-        emp.setFirstName("JunitLast");
-        emp.setEmail("JunitUser.JunitLast@test.com");
+        emp.setFirstName("JunitUser"+suffix);
+        emp.setFirstName("JunitLast"+suffix);
+        emp.setEmail("JunitUser"+suffix+".JunitLast"+suffix+"@test.com");
         emp.setTitle("Tester");
         emp.setSalary(100.0);
         
@@ -263,13 +264,21 @@ public class EmployeeSystemTestSuite {
         Response response = invocationBuilder.post(Entity.entity(emp, MediaType.APPLICATION_JSON));
         
         String output = response.readEntity(String.class);
-        logger.debug(response.toString());
+        
         logger.debug(response.toString());
         assertThat(response.getStatus(), is(200));
+        
+        return output;
     }
     
     @Test
     public void test06_test_deleteEmpId() {
+        
+        getFirstEmpId(createTestEmployee("DeleteMe"));
+        
+        String idStr = getLastEmpId(getAllEmployees());
+        
+        logger.debug("Delete emp id:" + idStr);
         Client client = ClientBuilder.newClient();
         URI uri = UriBuilder
             .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
@@ -277,11 +286,7 @@ public class EmployeeSystemTestSuite {
             .host(HOST)
             .port(PORT)
             .build();
-        
-        
-        String idStr = getLastEmpId(getAllEmployees());
-        
-        logger.debug("Id:" + idStr);
+       
         
         WebTarget webTarget = client
             .register(feature)
@@ -298,14 +303,27 @@ public class EmployeeSystemTestSuite {
         assertThat(response.getStatus(), is(200));
     }
 
+    private String getFirstEmpId(String empStr) {
+        if (empStr == null || empStr.isEmpty())
+        {
+            return "0";
+        }
+        int indexOfId = empStr.indexOf("id")+4;
+        if (indexOfId == -1)
+        {
+            return "0";
+        }
+        String idStr = empStr.substring(indexOfId, empStr.indexOf(',', indexOfId));
+        return idStr;
+    }
+    
     private String getLastEmpId(String empStr) {
         int lastId = empStr.lastIndexOf("id")+4;
         String idStr = empStr.substring(lastId, empStr.indexOf(',', lastId));
         return idStr;
     }
     
-
-    @Ignore
+    @Test
     public void test07_all_employees_userrole() throws JsonMappingException, JsonProcessingException {
         Response response = webTarget.register(userAuth)
             // .register(adminAuth)
@@ -313,20 +331,48 @@ public class EmployeeSystemTestSuite {
         assertThat(response.getStatus(), is(403));
     }
 
-    @Ignore
+    @Test
     public void test08_employee_by_id_userrole() throws JsonMappingException, JsonProcessingException {
-        Response response = webTarget.register(userAuth)
-            // .register(adminAuth)
-            .path(EMPLOYEE_RESOURCE_NAME + "/1").request().get();
+        
+        
+        /*
+         * String id = getLastEmpId(getAllEmployees());
+         * logger.debug("Found Id:" + id);
+         * Response response = webTarget.register(userAuth)
+         * // .register(adminAuth)
+         * .path(EMPLOYEE_RESOURCE_NAME + "/" + id).request().get();
+         * assertThat(response.getStatus(), is(200));
+         * EmployeePojo emps = response.readEntity(new GenericType<EmployeePojo>() {});
+         * assertEquals(emps.getId(), 1);
+         */
+        Client client = ClientBuilder.newClient();
+        URI uri = UriBuilder
+            .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+            .scheme(HTTP_SCHEMA)
+            .host(HOST)
+            .port(PORT)
+            .build();
+        
+        String id = getLastEmpId(getAllEmployees());
+        logger.debug("Found Id:" + id);
+        
+        WebTarget webTarget = client
+            .register(userAuth)    // Authentication
+            .target(uri)
+            .path(EMP_RESOURCE+"/" + id);
+        logger.debug(webTarget
+            .request(APPLICATION_JSON).toString());
+        Response response = webTarget
+            .request(APPLICATION_JSON)
+            .get();
+        String output = response.readEntity(String.class);
+        logger.debug(response.toString());
+        logger.debug(response.toString());
         assertThat(response.getStatus(), is(200));
-        EmployeePojo emps = response.readEntity(new GenericType<EmployeePojo>() {});
-        assertEquals(emps.getId(), 1);
     }
 
     @Ignore
     public void test09_employee_by_id_userrole() throws JsonMappingException, JsonProcessingException {
-        
-        
        
         Response response = webTarget.register(userAuth)
             // .register(adminAuth)
@@ -440,4 +486,5 @@ public class EmployeeSystemTestSuite {
         logger.debug(response.toString());
         assertThat(response.getStatus(), is(200));
     }
+    
 }
