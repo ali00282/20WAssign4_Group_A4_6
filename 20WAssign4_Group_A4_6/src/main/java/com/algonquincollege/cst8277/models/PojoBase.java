@@ -22,6 +22,11 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Version;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+
 /**
  * Abstract class that is base of (class) hierarchy for all c.a.cst8277.models @Entity classes
  */
@@ -33,7 +38,11 @@ public abstract class PojoBase implements Serializable {
 
     protected int id;
     protected int version;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     protected LocalDateTime CREATED_DATE;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     protected LocalDateTime UPDATED_DATE;
     // TODO - add audit properties
 

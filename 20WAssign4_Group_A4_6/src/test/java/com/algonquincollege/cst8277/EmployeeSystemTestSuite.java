@@ -15,10 +15,14 @@ import static com.algonquincollege.cst8277.utils.MyConstants.EMPLOYEE_RESOURCE_N
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.persistence.EntityListeners;
@@ -36,6 +40,7 @@ import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.logging.LoggingFeature;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -44,9 +49,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
+import com.algonquincollege.cst8277.models.AddressPojo;
 import com.algonquincollege.cst8277.models.EmployeePojo;
+import com.algonquincollege.cst8277.models.HomePhone;
+import com.algonquincollege.cst8277.models.MobilePhone;
+import com.algonquincollege.cst8277.models.PhonePojo;
+import com.algonquincollege.cst8277.models.WorkPhone;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /*This is the comment to see commit in github*/
 public class EmployeeSystemTestSuite {
@@ -133,6 +144,10 @@ public class EmployeeSystemTestSuite {
     
     @Test
     public void test02_test_getAllEmployees() {
+        getAllEmployees();
+    }
+
+    private String getAllEmployees() {
         Client client = ClientBuilder.newClient();
         URI uri = UriBuilder
             .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
@@ -149,8 +164,8 @@ public class EmployeeSystemTestSuite {
         Response response = webTarget
             .request(APPLICATION_JSON)
             .get();
-        String output = response.readEntity(String.class);
-        assertThat(response.getStatus(), is(200));
+        
+        return response.readEntity(String.class);
     }
     
     @Test
@@ -162,10 +177,14 @@ public class EmployeeSystemTestSuite {
             .host(HOST)
             .port(PORT)
             .build();
+        
+        String id = getLastEmpId(getAllEmployees());
+        logger.debug("Found Id:" + id);
+        
         WebTarget webTarget = client
             .register(feature)
             .target(uri)
-            .path(EMP_RESOURCE+"/2");
+            .path(EMP_RESOURCE+"/" + id);
         logger.debug(webTarget
             .request(APPLICATION_JSON).toString());
         Response response = webTarget
@@ -259,18 +278,9 @@ public class EmployeeSystemTestSuite {
             .port(PORT)
             .build();
         
-        WebTarget getWebTarget = client
-            .register(feature)
-            .target(uri)
-            .path(EMP_RESOURCE);
         
-        logger.debug("Here");
-        Invocation.Builder getInvocationBuilder = getWebTarget.request(MediaType.APPLICATION_JSON);
-        String empStr = getInvocationBuilder.get(String.class);
-        int lastId = empStr.lastIndexOf("id")+4;
-        String idStr = empStr.substring(lastId, empStr.indexOf(',', lastId));
+        String idStr = getLastEmpId(getAllEmployees());
         
-        logger.debug("Emp string: " + empStr);
         logger.debug("Id:" + idStr);
         
         WebTarget webTarget = client
@@ -287,19 +297,16 @@ public class EmployeeSystemTestSuite {
         logger.debug(response.toString());
         assertThat(response.getStatus(), is(200));
     }
-    
-    @Ignore
-    public void test01_all_employees_adminrole() throws JsonMappingException, JsonProcessingException {
-//        Response response = webTarget
-//            .register(adminAuth).path(EMPLOYEE_RESOURCE_NAME).request().get();
-//        assertThat(response.getStatus(), is(200));
-//        List<EmployeePojo> emps = response.readEntity(new GenericType(genericType)<List<EmployeePojo>>() {});
-//        assertThat(emps, is(not(empty())));
-////        assertThat(emps, hasSize(2));
+
+    private String getLastEmpId(String empStr) {
+        int lastId = empStr.lastIndexOf("id")+4;
+        String idStr = empStr.substring(lastId, empStr.indexOf(',', lastId));
+        return idStr;
     }
+    
 
     @Ignore
-    public void test02_all_employees_userrole() throws JsonMappingException, JsonProcessingException {
+    public void test07_all_employees_userrole() throws JsonMappingException, JsonProcessingException {
         Response response = webTarget.register(userAuth)
             // .register(adminAuth)
             .path(EMPLOYEE_RESOURCE_NAME).request().get();
@@ -307,7 +314,7 @@ public class EmployeeSystemTestSuite {
     }
 
     @Ignore
-    public void test03_employee_by_id_userrole() throws JsonMappingException, JsonProcessingException {
+    public void test08_employee_by_id_userrole() throws JsonMappingException, JsonProcessingException {
         Response response = webTarget.register(userAuth)
             // .register(adminAuth)
             .path(EMPLOYEE_RESOURCE_NAME + "/1").request().get();
@@ -317,18 +324,120 @@ public class EmployeeSystemTestSuite {
     }
 
     @Ignore
-    public void test04_employee_by_id_userrole() throws JsonMappingException, JsonProcessingException {
+    public void test09_employee_by_id_userrole() throws JsonMappingException, JsonProcessingException {
+        
+        
+       
         Response response = webTarget.register(userAuth)
             // .register(adminAuth)
             .path(EMPLOYEE_RESOURCE_NAME + "/2").request().get();
         assertThat(response.getStatus(), is(403));
     }
-
-    @Ignore
-    public void test05_employee_by_id_adminrole() throws JsonMappingException, JsonProcessingException {
-        Response response = webTarget
-            // .register(userAuth)
-            .register(adminAuth).path(EMPLOYEE_RESOURCE_NAME + "/1").request().get();
-        assertThat(response.getStatus(), is(403));
+    
+    
+    @Test
+    public void test10_test_addressOnEmployees() {
+        Client client = ClientBuilder.newClient();
+        URI uri = UriBuilder
+            .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+            .scheme(HTTP_SCHEMA)
+            .host(HOST)
+            .port(PORT)
+            .build();
+        WebTarget webTarget = client
+            .register(feature)
+            .target(uri)
+            .path(EMP_RESOURCE+"/add");
+        logger.debug(webTarget
+            .request(APPLICATION_JSON).toString());
+        
+        EmployeePojo emp = new EmployeePojo();
+        emp.setFirstName("JunitUser");
+        emp.setFirstName("JunitLast");
+        emp.setEmail("JunitUser.JunitLast@test.com");
+        emp.setTitle("Tester");
+        emp.setSalary(100.0);
+        
+        AddressPojo address = new AddressPojo();
+        address.setCity("Nepean");
+        address.setStreet("123 GOES NOWHERE STREET");
+        address.setState("NEWPLACE");
+        address.setCountry("Fancylan");
+        address.setPostal("ABC 123");
+        
+        emp.setAddress(address);
+        
+        Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
+        
+        Response response = invocationBuilder.post(Entity.entity(emp, MediaType.APPLICATION_JSON));
+        
+        String output = response.readEntity(String.class);
+        logger.debug(response.toString());
+        logger.debug(response.toString());
+        assertThat(response.getStatus(), is(200));
+    }
+    
+    @Test
+    public void test11_test_PhoneListOnEmployees() {
+        Client client = ClientBuilder.newClient();
+        URI uri = UriBuilder
+            .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+            .scheme(HTTP_SCHEMA)
+            .host(HOST)
+            .port(PORT)
+            .build();
+        WebTarget webTarget = client
+            .register(feature)
+            .target(uri)
+            .path(EMP_RESOURCE+"/add");
+        logger.debug(webTarget
+            .request(APPLICATION_JSON).toString());
+        
+        EmployeePojo emp = new EmployeePojo();
+        emp.setFirstName("JunitUser");
+        emp.setFirstName("JunitLast");
+        emp.setEmail("JunitUser.JunitLast@test.com");
+        emp.setTitle("Tester");
+        emp.setSalary(100.0);
+        
+        AddressPojo address = new AddressPojo();
+        address.setCity("Nepean");
+        address.setStreet("123 GOES NOWHERE STREET");
+        address.setState("NEWPLACE");
+        address.setCountry("Fancyland");
+        address.setPostal("ABC 123");
+        
+        emp.setAddress(address);
+        
+        List<PhonePojo> phones = new ArrayList<PhonePojo>();
+        PhonePojo home = new HomePhone();
+        home.setAreacode("613");
+        home.setPhoneNumber("123 4567");
+        home.setPhone_type("H");
+        
+        PhonePojo work = new WorkPhone();
+        home.setAreacode("613");
+        home.setPhoneNumber("123 4567");
+        home.setPhone_type("H");
+        
+        PhonePojo mobile = new MobilePhone();
+        home.setAreacode("613");
+        home.setPhoneNumber("123 4567");
+        home.setPhone_type("H");
+        
+        phones.add(home);
+        phones.add(work);
+        phones.add(mobile);
+        
+        emp.setPhones(phones);
+        
+        Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
+        
+        Response response = invocationBuilder.post(Entity.entity(emp, MediaType.APPLICATION_JSON));
+        
+        String output = response.readEntity(String.class);
+        logger.debug(response.toString());
+        logger.debug(response.toString());
+        assertThat(response.getStatus(), is(200));
     }
 }
