@@ -20,6 +20,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -185,7 +186,9 @@ public class EmployeeSystemTestSuite {
             .port(PORT)
             .build();
         
-        String id = getLastEmpId(getAllEmployees());
+        List<EmployeePojo> employees = getAllEmployeesV2();
+        
+        int id = employees.get(employees.size() - 1).getId();
         logger.debug("Found Id:" + id);
         
         WebTarget webTarget = client
@@ -925,6 +928,267 @@ public class EmployeeSystemTestSuite {
         logger.debug(response.toString());
         assertThat(response.getStatus(), is(200));
     }
+    
+    @Test
+    public void test31_test_createdDateOnPhone() {
+        createTestEmployee("cdateOnPhone");
+        
+        List<EmployeePojo> employees = getAllEmployeesV2();
+        
+        EmployeePojo emp = employees.get(employees.size() - 1);
+        
+        List<PhonePojo> phones = new ArrayList<>();
+        
+        MobilePhone mp = new MobilePhone();
+        mp.setAreacode("222");
+        mp.setPhoneNumber("222 2222");
+        mp.setPhone_type("M");
+        phones.add(mp);
+        
+        emp.setPhones(phones);
+        
+        Client client = ClientBuilder.newClient();
+        URI uri = UriBuilder
+            .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+            .scheme(HTTP_SCHEMA)
+            .host(HOST)
+            .port(PORT)
+            .build();
+        WebTarget webTarget = client
+            .register(feature)
+            .register(MyObjectMapperProvider.class)
+            .target(uri)
+            .path(EMP_RESOURCE+"/update/");
+        logger.debug(webTarget
+            .request(APPLICATION_JSON).toString());
+        Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
+        
+         Response response2 = invocationBuilder.post(Entity.entity(emp, MediaType.APPLICATION_JSON));
+        
+         assertEquals(200, response2.getStatus());
+         
+         client = ClientBuilder.newClient();
+         uri = UriBuilder
+             .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+             .scheme(HTTP_SCHEMA)
+             .host(HOST)
+             .port(PORT)
+             .build();
+         
+         WebTarget getWebTarget2 = client
+             .register(feature)
+             .register(MyObjectMapperProvider.class)
+             .register(MyObjectMapperProvider.class)
+             .target(uri)
+             .path(EMP_RESOURCE+"/" + emp.getId());
+         
+         Invocation.Builder getInvocationBuilder2 = getWebTarget2.request(MediaType.APPLICATION_JSON);
+         
+         emp = getInvocationBuilder2.get(EmployeePojo.class);
+         
+        
+        assertNotNull(emp.getPhones().get(0));
+        assertNotNull(emp.getPhones().get(0).getCREATED_DATE());
+    }
+    
+    @Test
+    public void test32_test_updatedDateOnPhone() {
+        
+        createTestEmployee("udateOnPhone");
+        
+        List<EmployeePojo> employees = getAllEmployeesV2();
+        
+        EmployeePojo emp = employees.get(employees.size() - 1);
+        
+        List<PhonePojo> phones = new ArrayList<>();
+        
+        MobilePhone mp = new MobilePhone();
+        mp.setAreacode("222");
+        mp.setPhoneNumber("222 2222");
+        mp.setPhone_type("M");
+        phones.add(mp);
+        
+        emp.setPhones(phones);
+        
+        Client client = ClientBuilder.newClient();
+        URI uri = UriBuilder
+            .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+            .scheme(HTTP_SCHEMA)
+            .host(HOST)
+            .port(PORT)
+            .build();
+        WebTarget webTarget = client
+            .register(feature)
+            .register(MyObjectMapperProvider.class)
+            .target(uri)
+            .path(EMP_RESOURCE+"/update/");
+        logger.debug(webTarget
+            .request(APPLICATION_JSON).toString());
+        Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
+        
+         Response response2 = invocationBuilder.post(Entity.entity(emp, MediaType.APPLICATION_JSON));
+        
+         assertEquals(200, response2.getStatus());
+         
+        assertNotNull(emp.getPhones().get(0));
+
+        client = ClientBuilder.newClient();
+        uri = UriBuilder
+            .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+            .scheme(HTTP_SCHEMA)
+            .host(HOST)
+            .port(PORT)
+            .build();
+        
+        WebTarget getWebTarget2 = client
+            .register(feature)
+            .register(MyObjectMapperProvider.class)
+            .register(MyObjectMapperProvider.class)
+            .target(uri)
+            .path(EMP_RESOURCE+"/" + emp.getId());
+        
+        Invocation.Builder getInvocationBuilder2 = getWebTarget2.request(MediaType.APPLICATION_JSON);
+        
+        emp = getInvocationBuilder2.get(EmployeePojo.class);
+        
+        emp.getPhones().get(0).setAreacode("111");
+        response2 = invocationBuilder.post(Entity.entity(emp, MediaType.APPLICATION_JSON));
+        
+        assertEquals(200, response2.getStatus());
+        
+        emp = getInvocationBuilder2.get(EmployeePojo.class);
+        
+        assertNotNull(emp.getPhones().get(0));
+        assertNotNull(emp.getPhones().get(0).getUPDATED_DATE());
+    }
+    
+    @Test
+    public void test33_a_test_taskDescription() {
+        createTestEmployee("descOnTask");
+        
+        List<EmployeePojo> employees = getAllEmployeesV2();
+        
+        EmployeePojo emp = employees.get(employees.size() - 1);
+        
+        List<EmployeeTask> tasks = new ArrayList<>();
+        
+        EmployeeTask task = new EmployeeTask();
+        task.setDescription("Some Task");
+        tasks.add(task);
+        
+        emp.setEmployeeTask(tasks);
+        logger.debug("task count:" + tasks.size());
+        logger.debug("Task emp id:" + emp.getId());
+        
+        Client client = ClientBuilder.newClient();
+        URI uri = UriBuilder
+            .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+            .scheme(HTTP_SCHEMA)
+            .host(HOST)
+            .port(PORT)
+            .build();
+        WebTarget webTarget = client
+            .register(feature)
+            .register(MyObjectMapperProvider.class)
+            .target(uri)
+            .path(EMP_RESOURCE+"/update/");
+        logger.debug(webTarget
+            .request(APPLICATION_JSON).toString());
+        Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
+        
+         Response response2 = invocationBuilder.post(Entity.entity(emp, MediaType.APPLICATION_JSON));
+         logger.debug("task count:" + emp.getEmployeeTask().size());
+        
+         assertEquals(200, response2.getStatus());
+         
+         client = ClientBuilder.newClient();
+         uri = UriBuilder
+             .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+             .scheme(HTTP_SCHEMA)
+             .host(HOST)
+             .port(PORT)
+             .build();
+         
+         WebTarget getWebTarget2 = client
+             .register(feature)
+             .register(MyObjectMapperProvider.class)
+             .target(uri)
+             .path(EMP_RESOURCE+"/" + emp.getId());
+         
+         logger.debug("Task emp id:" + emp.getId());
+         
+         Invocation.Builder getInvocationBuilder2 = getWebTarget2.request(MediaType.APPLICATION_JSON);
+         
+         emp = getInvocationBuilder2.get(EmployeePojo.class);
+         
+         logger.debug("task count:" + emp.getEmployeeTask().size());
+        
+        assertNotNull(emp.getEmployeeTask().get(0));
+        assertEquals("Some Task", emp.getEmployeeTask().get(0).getDescription());
+    }
+    
+    @Test
+    public void test33_b_test_taskDeletion() {
+        createTestEmployee("delTask");
+        
+        List<EmployeePojo> employees = getAllEmployeesV2();
+        
+        EmployeePojo emp = employees.get(employees.size() - 1);
+        
+        List<EmployeeTask> tasks = new ArrayList<>();
+        
+        EmployeeTask task = new EmployeeTask();
+        task.setDescription("Some Task");
+        tasks.add(task);
+        
+        emp.setEmployeeTask(tasks);
+        
+        Client client = ClientBuilder.newClient();
+        URI uri = UriBuilder
+            .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+            .scheme(HTTP_SCHEMA)
+            .host(HOST)
+            .port(PORT)
+            .build();
+        WebTarget webTarget = client
+            .register(feature)
+            .register(MyObjectMapperProvider.class)
+            .target(uri)
+            .path(EMP_RESOURCE+"/update/");
+        logger.debug(webTarget
+            .request(APPLICATION_JSON).toString());
+        Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
+        
+         Response response2 = invocationBuilder.post(Entity.entity(emp, MediaType.APPLICATION_JSON));
+        
+         assertEquals(200, response2.getStatus());
+         
+         emp.setEmployeeTask(null);
+         
+         response2 = invocationBuilder.post(Entity.entity(emp, MediaType.APPLICATION_JSON));
+         
+         client = ClientBuilder.newClient();
+         uri = UriBuilder
+             .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+             .scheme(HTTP_SCHEMA)
+             .host(HOST)
+             .port(PORT)
+             .build();
+         
+         WebTarget getWebTarget2 = client
+             .register(feature)
+             .register(MyObjectMapperProvider.class)
+             .register(MyObjectMapperProvider.class)
+             .target(uri)
+             .path(EMP_RESOURCE+"/" + emp.getId());
+         
+         Invocation.Builder getInvocationBuilder2 = getWebTarget2.request(MediaType.APPLICATION_JSON);
+         
+         emp = getInvocationBuilder2.get(EmployeePojo.class);
+        
+        assertEquals(0, emp.getEmployeeTask().size());
+    }
+    
     @Test
     public void test34_test_negative_deleteNonExistingEmpId() {
         

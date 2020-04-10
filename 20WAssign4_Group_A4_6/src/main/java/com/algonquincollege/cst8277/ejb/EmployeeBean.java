@@ -65,6 +65,7 @@ public class EmployeeBean {
                     dbEmp.setSalary(emp.getSalary());
                     dbEmp.setAddress(emp.getAddress());
                     dbEmp.setPhones(emp.getPhones());
+                    dbEmp.setEmployeeTask(emp.getEmployeeTask());
                     em.persist(dbEmp);
                 }
         }
