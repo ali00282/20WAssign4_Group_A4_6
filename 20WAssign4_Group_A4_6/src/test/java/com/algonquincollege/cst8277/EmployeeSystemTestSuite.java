@@ -15,10 +15,12 @@ import static com.algonquincollege.cst8277.utils.MyConstants.EMPLOYEE_RESOURCE_N
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.util.ArrayList;
@@ -55,6 +57,7 @@ import com.algonquincollege.cst8277.models.HomePhone;
 import com.algonquincollege.cst8277.models.MobilePhone;
 import com.algonquincollege.cst8277.models.PhonePojo;
 import com.algonquincollege.cst8277.models.WorkPhone;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -371,15 +374,15 @@ public class EmployeeSystemTestSuite {
         assertThat(response.getStatus(), is(200));
     }
 
-    @Ignore
-    public void test09_employee_by_id_userrole() throws JsonMappingException, JsonProcessingException {
-       
-        Response response = webTarget.register(userAuth)
-            // .register(adminAuth)
-            .path(EMPLOYEE_RESOURCE_NAME + "/2").request().get();
-        assertThat(response.getStatus(), is(403));
-    }
-    
+//    @Ignore
+//    public void test09_employee_by_id_userrole() throws JsonMappingException, JsonProcessingException {
+//
+//        Response response = webTarget.register(userAuth)
+//            // .register(adminAuth)
+//            .path(EMPLOYEE_RESOURCE_NAME + "/2").request().get();
+//        assertThat(response.getStatus(), is(403));
+//    }
+//
     
     @Test
     public void test10_test_addressOnEmployees() {
@@ -485,6 +488,154 @@ public class EmployeeSystemTestSuite {
         logger.debug(response.toString());
         logger.debug(response.toString());
         assertThat(response.getStatus(), is(200));
+    }
+    
+    @Test
+    public void test12_test_Delete_Resource() {
+        Client adminClient = ClientBuilder.newClient();
+      
+        WebTarget webTarget2 = adminClient.register(feature).target(uri).path(EMP_RESOURCE);
+        Response response2 = webTarget2.request(APPLICATION_JSON).delete();
+    
+        assertThat(response2.getStatus(), is(405));
+    }
+    
+    @Test
+    public void test13_test_User_Roles() {
+        Client userClient = ClientBuilder.newClient();
+        Client adminClient = ClientBuilder.newClient();
+
+        WebTarget webTarget1 = userClient.register(userAuth).target(uri).path(EMP_RESOURCE);
+        WebTarget webTarget2 = adminClient.register(feature).target(uri).path(EMP_RESOURCE);
+
+        Response response1 = webTarget1.request(APPLICATION_JSON).get();
+        Response response2 = webTarget2.request(APPLICATION_JSON).get();
+        assertNotEquals(response1.readEntity(String.class), response2.readEntity(String.class));
+
+    }
+    
+    @Test
+    public void test14_test_User_default() {
+        Client adminClient = ClientBuilder.newClient();
+
+        WebTarget webTarget1 = adminClient.register(adminAuth).target(uri).path(EMP_RESOURCE);
+        
+        String newName = "This is a new name";
+        
+        Response response1 = webTarget1.request(APPLICATION_JSON).put(Entity.json(newName));
+        assertNotEquals(response1.getStatus(), is(405));
+    }
+    
+    @Test
+    public void test15_test_Password_Update_user() throws JsonParseException, JsonMappingException, IOException {
+      
+        Client adminClient = ClientBuilder.newClient();
+        WebTarget adminLogin = adminClient.register(userAuth).target(uri).path(EMP_RESOURCE);
+        Response response1 = adminLogin.request(APPLICATION_JSON).put(Entity.json("123456"));
+        assertNotEquals(response1.getStatus(), is(405));
+    }
+    
+    @Test
+    public void test16_test_Password_Delete_user() throws JsonParseException, JsonMappingException, IOException {
+        Client adminClient = ClientBuilder.newClient();
+        WebTarget adminLogin = adminClient.register(feature).target(uri).path(EMP_RESOURCE);
+        Response response1 = adminLogin.request(APPLICATION_JSON).delete();
+        assertNotEquals(response1.getStatus(), is(200));
+    }
+    
+    @Test
+    public void test17_test_Multiple_Roles() {
+        HttpAuthenticationFeature user = HttpAuthenticationFeature.basic(DEFAULT_USER, DEFAULT_USER_PW);
+        HttpAuthenticationFeature admin = HttpAuthenticationFeature.basic(DEFAULT_ADMIN_USER, DEFAULT_ADMIN_USER_PW);
+        Client userClient = ClientBuilder.newClient();
+        Client adminClient = ClientBuilder.newClient();
+
+        URI uri = UriBuilder.fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION).scheme(HTTP_SCHEMA).host(HOST)
+                .port(8080).build();
+        WebTarget webTarget1 = userClient.register(user).target(uri).path(EMP_RESOURCE);
+        WebTarget webTarget2 = adminClient.register(admin).target(uri).path(EMP_RESOURCE);
+
+        Response response1 = webTarget1.request(APPLICATION_JSON).get();
+        Response response2 = webTarget2.request(APPLICATION_JSON).get();
+        assertNotEquals(response1.getStatus(), is(401));
+        assertNotEquals(response2.getStatus(), is(401));
+        assertNotEquals(response1.readEntity(String.class), response2.readEntity(String.class));
+    }
+    
+    @Test
+    public void test18_testPostMethod_User() throws JsonParseException, JsonMappingException, IOException {
+        HttpAuthenticationFeature admin = HttpAuthenticationFeature.basic("admin", "admin");
+        Client adminClient = ClientBuilder.newClient();
+
+        URI uri = UriBuilder.fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION).scheme(HTTP_SCHEMA).host(HOST)
+                .port(8080).build();
+        WebTarget webTarget1 = adminClient.register(admin).target(uri).path(EMP_RESOURCE);
+
+        EmployeePojo emp1 = new EmployeePojo();
+        emp1.setFirstName("test Employee Post");
+        String userJson = "[\n" +
+                "   {\n" +
+                "       \"name\": \"test Employee Post\"\n" +
+                "   }]";
+        Response response1 = webTarget1.request(APPLICATION_JSON).post(Entity.json(userJson));
+        assertThat(response1.getStatus(), is(405));
+    }
+    
+            
+    @Test
+    public void test19_testUser_BasicAuth_getA() {
+        URI uri = UriBuilder.fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION).scheme(HTTP_SCHEMA).host(HOST)
+                .port(8080).build();
+        HttpAuthenticationFeature admin = HttpAuthenticationFeature.basic(DEFAULT_ADMIN_USER, DEFAULT_ADMIN_USER_PW);
+        Client client2 = ClientBuilder.newClient();
+
+        
+        WebTarget webTarget4 = client2.register(admin).target(uri).path("user/1");
+
+        Response response4 = webTarget4.request(APPLICATION_JSON).delete();
+        assertThat(response4.getStatus(), is(404));
+    }
+    
+    @Test
+    public void test20_testUser_BasicAuth_get() {
+        URI uri = UriBuilder.fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION).scheme(HTTP_SCHEMA).host(HOST)
+                .port(8080).build();
+        Client client = ClientBuilder.newClient();
+        WebTarget webTarget1 = client.target(uri).path(EMP_RESOURCE);
+      
+        Response response = webTarget1.request(APPLICATION_JSON).get();
+        assertThat(response.getStatus(), is(401));
+    }
+
+    @Test
+    public void test21_testUser_BasicAuth_post() {
+        URI uri = UriBuilder.fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION).scheme(HTTP_SCHEMA)
+            .host(HOST).port(8080).build();
+        Client client = ClientBuilder.newClient();
+        WebTarget webTarget1 = client.target(uri).path(EMP_RESOURCE);
+        Response response1 = webTarget1.request(APPLICATION_JSON).post(null);
+        assertThat(response1.getStatus(), is(405));
+    }
+    
+    @Test
+    public void test22_testUser_BasicAuth_get_B() {
+        URI uri = UriBuilder.fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION).scheme(HTTP_SCHEMA)
+            .host(HOST).port(8080).build();
+        Client client = ClientBuilder.newClient();
+        WebTarget webTarget2 = client.target(uri).path(EMP_RESOURCE + "/1");
+        Response response2 = webTarget2.request(APPLICATION_JSON).get();
+        assertThat(response2.getStatus(), is(401));
+    }
+    
+    @Test
+    public void test23_testUser_BasicAuth_delete() {
+        URI uri = UriBuilder.fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION).scheme(HTTP_SCHEMA)
+            .host(HOST).port(8080).build();
+        HttpAuthenticationFeature admin = HttpAuthenticationFeature.basic(DEFAULT_ADMIN_USER, DEFAULT_ADMIN_USER_PW);
+        Client client2 = ClientBuilder.newClient();
+        WebTarget webTarget4 = client2.register(admin).target(uri).path(EMP_RESOURCE + "/1");
+        Response response4 = webTarget4.request(APPLICATION_JSON).delete();
+        assertThat(response4.getStatus(), is(405));
     }
     
 }
