@@ -49,19 +49,23 @@ public class EmployeeBean {
     }
 
     public void updateEmployee(EmployeePojo emp) {
-        EmployeePojo dbEmp = (EmployeePojo)em.createQuery("select e from Employee e where e.id=" + emp.getId())
-            .getSingleResult();
-        if (dbEmp != null) {
-            dbEmp.setFirstName(emp.getFirstName());
-            dbEmp.setLastName(emp.getLastName());
-            dbEmp.setEmail(emp.getEmail());
-            dbEmp.setTitle(emp.getTitle());
-            dbEmp.setSalary(emp.getSalary());
-            dbEmp.setAddress(emp.getAddress());
-            dbEmp.setPhones(emp.getPhones());
-            em.persist(dbEmp);
+        try {
+            EmployeePojo dbEmp = (EmployeePojo)em.createQuery("select e from Employee e where e.id=" + emp.getId())
+                .getSingleResult();
+                if (dbEmp != null) {
+                    dbEmp.setFirstName(emp.getFirstName());
+                    dbEmp.setLastName(emp.getLastName());
+                    dbEmp.setEmail(emp.getEmail());
+                    dbEmp.setTitle(emp.getTitle());
+                    dbEmp.setSalary(emp.getSalary());
+                    dbEmp.setAddress(emp.getAddress());
+                    dbEmp.setPhones(emp.getPhones());
+                    em.persist(dbEmp);
+                }
         }
-        else {
+        catch (Exception e) {
+            
+            // if the employee does not exist, create him
             em.persist(emp);
         }
     }

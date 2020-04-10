@@ -11,7 +11,9 @@ package com.algonquincollege.cst8277.models;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
+import javax.json.bind.annotation.JsonbDateFormat;
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
@@ -38,9 +40,14 @@ public abstract class PojoBase implements Serializable {
 
     protected int id;
     protected int version;
+    
+    @JsonbDateFormat(value = "yyyy-MM-ddTHH:mm:ss")
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     protected LocalDateTime CREATED_DATE;
+    
+    
+    @JsonbDateFormat(value = "yyyy-MM-ddTHH:mm:ss")
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     protected LocalDateTime UPDATED_DATE;

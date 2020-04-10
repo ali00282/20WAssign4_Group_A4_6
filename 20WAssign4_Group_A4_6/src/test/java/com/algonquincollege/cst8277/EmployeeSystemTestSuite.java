@@ -166,6 +166,8 @@ public class EmployeeSystemTestSuite {
         return response.readEntity(String.class);
     }
     
+
+    
     @Test
     public void test03_test_getEmpById() {
         Client client = ClientBuilder.newClient();
@@ -490,6 +492,7 @@ public class EmployeeSystemTestSuite {
         assertThat(response.getStatus(), is(200));
     }
     
+
     @Test
     public void test12_test_Delete_Resource() {
         Client adminClient = ClientBuilder.newClient();
@@ -636,6 +639,433 @@ public class EmployeeSystemTestSuite {
         WebTarget webTarget4 = client2.register(admin).target(uri).path(EMP_RESOURCE + "/1");
         Response response4 = webTarget4.request(APPLICATION_JSON).delete();
         assertThat(response4.getStatus(), is(405));
+    }
+    
+    @Test
+    public void test34_test_negative_deleteNonExistingEmpId() {
+        
+        Client client = ClientBuilder.newClient();
+        URI uri = UriBuilder
+            .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+            .scheme(HTTP_SCHEMA)
+            .host(HOST)
+            .port(PORT)
+            .build();
+       
+        
+        WebTarget webTarget = client
+            .register(feature)
+            .target(uri)
+            .path(EMP_RESOURCE+"/delete/" + 100000);
+        logger.debug(webTarget
+            .request(APPLICATION_JSON).toString());
+        Response response = webTarget
+            .request(APPLICATION_JSON)
+            .get();
+        assertNotEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void test35_test_updateOrInsertEmp() {
+        
+        deleteEmp(1000000);
+        
+        getFirstEmpId(createTestEmployee("UpdateMe"));
+        
+        String idStr = getLastEmpId(getAllEmployees());
+        
+        logger.debug("Update Me emp id:" + idStr);
+        Client client = ClientBuilder.newClient();
+        URI uri = UriBuilder
+            .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+            .scheme(HTTP_SCHEMA)
+            .host(HOST)
+            .port(PORT)
+            .build();
+        
+        WebTarget getWebTarget2 = client
+            .register(feature)
+            .register(MyObjectMapperProvider.class)
+            .target(uri)
+            .path(EMP_RESOURCE+"/" + idStr);
+        
+        Invocation.Builder getInvocationBuilder2 = getWebTarget2.request(MediaType.APPLICATION_JSON);
+        
+        EmployeePojo emp = getInvocationBuilder2.get(EmployeePojo.class);
+
+        // Set non-existing employee
+        emp.setId(1000000);
+       
+        
+        WebTarget webTarget = client
+            .register(feature)
+            .target(uri)
+            .path(EMP_RESOURCE+"/update/");
+        logger.debug(webTarget
+            .request(APPLICATION_JSON).toString());
+        Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
+        
+         Response response2 = invocationBuilder.post(Entity.entity(emp, MediaType.APPLICATION_JSON));
+        
+         assertEquals(200, response2.getStatus());
+         
+         
+        // Cleanup
+        deleteEmp(1000000);
+        
+    }
+    
+    private boolean deleteEmp(int id) {
+        Client client = ClientBuilder.newClient();
+        URI uri = UriBuilder
+            .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+            .scheme(HTTP_SCHEMA)
+            .host(HOST)
+            .port(PORT)
+            .build();
+       
+        
+        WebTarget webTarget = client
+            .register(feature)
+            .target(uri)
+            .path(EMP_RESOURCE+"/delete/" + id);
+        logger.debug(webTarget
+            .request(APPLICATION_JSON).toString());
+        Response response = webTarget
+            .request(APPLICATION_JSON)
+            .get();
+        
+        if (response.getStatus() == 200)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
+    private List<EmployeePojo> getAllEmployeesV2() {
+        Client client = ClientBuilder.newClient();
+        URI uri = UriBuilder
+            .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+            .scheme(HTTP_SCHEMA)
+            .host(HOST)
+            .port(PORT)
+            .build();
+        WebTarget webTarget = client
+            .register(feature)
+            .register(MyObjectMapperProvider.class)
+            .target(uri)
+            .path(EMP_RESOURCE);
+        logger.debug(webTarget
+            .request(APPLICATION_JSON).toString());
+        Response response = webTarget
+            .request(APPLICATION_JSON)
+            .get();
+        
+        return response.readEntity(new GenericType<List<EmployeePojo>>(){});
+    }
+    
+    @Test
+    public void test36_test_createTimeStampOnAddress() {
+        Client client = ClientBuilder.newClient();
+        URI uri = UriBuilder
+            .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+            .scheme(HTTP_SCHEMA)
+            .host(HOST)
+            .port(PORT)
+            .build();
+        WebTarget webTarget = client
+            .register(feature)
+            .target(uri)
+            .path(EMP_RESOURCE+"/add");
+        logger.debug(webTarget
+            .request(APPLICATION_JSON).toString());
+        
+        EmployeePojo emp = new EmployeePojo();
+        emp.setFirstName("JunitUser");
+        emp.setFirstName("JunitLast");
+        emp.setEmail("JunitUser.JunitLast@test.com");
+        emp.setTitle("Tester");
+        emp.setSalary(100.0);
+        
+        AddressPojo address = new AddressPojo();
+        address.setCity("Nepean");
+        address.setStreet("123 GOES NOWHERE STREET");
+        address.setState("NEWPLACE");
+        address.setCountry("Fancylan");
+        address.setPostal("ABC 123");
+        
+        emp.setAddress(address);
+        
+        Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
+        
+        Response response = invocationBuilder.post(Entity.entity(emp, MediaType.APPLICATION_JSON));
+        
+        String output = response.readEntity(String.class);
+        logger.debug(response.toString());
+        logger.debug(response.toString());
+        assertThat(response.getStatus(), is(200));
+        
+        List<EmployeePojo> employees = getAllEmployeesV2();
+        int id = employees.get(employees.size() - 1 ).getId();
+        
+        WebTarget getWebTarget2 = client
+            .register(feature)
+            .register(MyObjectMapperProvider.class)
+            .target(uri)
+            .path(EMP_RESOURCE+"/" + id);
+        
+        Invocation.Builder getInvocationBuilder2 = getWebTarget2.request(MediaType.APPLICATION_JSON);
+        
+        emp = getInvocationBuilder2.get(EmployeePojo.class);
+
+        assertNotNull(emp);
+        assertNotNull(emp.getAddress());
+        assertNotNull(emp.getAddress().getCREATED_DATE());
+        
+    }
+    
+    @Test
+    public void test37_test_updateTimeStampOnAddress() {
+        Client client = ClientBuilder.newClient();
+        URI uri = UriBuilder
+            .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+            .scheme(HTTP_SCHEMA)
+            .host(HOST)
+            .port(PORT)
+            .build();
+        WebTarget webTarget = client
+            .register(feature)
+            .target(uri)
+            .path(EMP_RESOURCE+"/add");
+        logger.debug(webTarget
+            .request(APPLICATION_JSON).toString());
+        
+        EmployeePojo emp = new EmployeePojo();
+        emp.setFirstName("JunitUser");
+        emp.setFirstName("JunitLast");
+        emp.setEmail("JunitUser.JunitLast@test.com");
+        emp.setTitle("Tester");
+        emp.setSalary(100.0);
+        
+        AddressPojo address = new AddressPojo();
+        address.setCity("Nepean");
+        address.setStreet("123 GOES NOWHERE STREET");
+        address.setState("NEWPLACE");
+        address.setCountry("Fancylan");
+        address.setPostal("ABC 123");
+        
+        emp.setAddress(address);
+        
+        Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
+        
+        Response response = invocationBuilder.post(Entity.entity(emp, MediaType.APPLICATION_JSON));
+        
+        String output = response.readEntity(String.class);
+        logger.debug(response.toString());
+        logger.debug(response.toString());
+        assertThat(response.getStatus(), is(200));
+        
+        List<EmployeePojo> employees = getAllEmployeesV2();
+        
+        int id =employees.get(employees.size() - 1).getId();
+        logger.debug("CreationDate employee: " + id);
+        
+        WebTarget getWebTarget2 = client
+            .register(feature)
+            .register(MyObjectMapperProvider.class)
+            .target(uri)
+            .path(EMP_RESOURCE+"/" + id);
+        
+        Invocation.Builder getInvocationBuilder2 = getWebTarget2.request(MediaType.APPLICATION_JSON);
+        
+        emp = getInvocationBuilder2.get(EmployeePojo.class);
+        
+        assertNotNull(emp);
+        assertNotNull(emp.getAddress());
+        
+        emp.getAddress().setCity("Another City");
+        
+        response = invocationBuilder.post(Entity.entity(emp, MediaType.APPLICATION_JSON));
+        
+        WebTarget getWebTarget3 = client
+            .register(feature)
+            .register(MyObjectMapperProvider.class)
+            .target(uri)
+            .path(EMP_RESOURCE+"/" + emp.getId());
+        
+        getInvocationBuilder2 = getWebTarget3.request(MediaType.APPLICATION_JSON);
+
+        emp = getInvocationBuilder2.get(EmployeePojo.class);
+        
+        assertNotNull(emp.getAddress().getUPDATED_DATE());
+    }
+    
+    @Test
+    public void test38_test_UpdatePhoneListOnEmployees() {
+        Client client = ClientBuilder.newClient();
+        URI uri = UriBuilder
+            .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+            .scheme(HTTP_SCHEMA)
+            .host(HOST)
+            .port(PORT)
+            .build();
+        WebTarget webTarget = client
+            .register(feature)
+            .register(MyObjectMapperProvider.class)
+            .target(uri)
+            .path(EMP_RESOURCE+"/update");
+        logger.debug(webTarget
+            .request(APPLICATION_JSON).toString());
+        
+        createTestEmployee("UpdatePhone");
+        String id = getLastEmpId(getAllEmployees());
+        
+        WebTarget getWebTarget = client
+            .register(feature)
+            .target(uri)
+            .path(EMP_RESOURCE+"/" + id);
+        
+        Invocation.Builder getInvocationBuilder = getWebTarget.request(MediaType.APPLICATION_JSON);
+        
+        EmployeePojo emp = getInvocationBuilder.get(EmployeePojo.class);
+        
+        List<PhonePojo> newPhones = new ArrayList<PhonePojo>();
+        PhonePojo home = new HomePhone();
+        home.setAreacode("613");
+        home.setPhoneNumber("123 4567");
+        home.setPhone_type("H");
+        
+        PhonePojo work = new WorkPhone();
+        home.setAreacode("613");
+        home.setPhoneNumber("123 4567");
+        home.setPhone_type("H");
+        
+        PhonePojo mobile = new MobilePhone();
+        home.setAreacode("613");
+        home.setPhoneNumber("123 4567");
+        home.setPhone_type("H");
+        
+        newPhones.add(home);
+        newPhones.add(work);
+        newPhones.add(mobile);
+        
+        emp.getPhones().addAll(newPhones);
+        
+        Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
+        
+        Response response = invocationBuilder.post(Entity.entity(emp, MediaType.APPLICATION_JSON));
+        
+        String output = response.readEntity(String.class);
+        logger.debug(response.toString());
+        logger.debug(response.toString());
+        assertThat(response.getStatus(), is(200));
+    }
+    
+    @Test
+    public void test39_test_creationDateOnEmployee() {
+        Client client = ClientBuilder.newClient();
+        URI uri = UriBuilder
+            .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+            .scheme(HTTP_SCHEMA)
+            .host(HOST)
+            .port(PORT)
+            .build();
+        WebTarget webTarget = client
+            .register(feature)
+            .register(MyObjectMapperProvider.class)
+            .target(uri)
+            .path(EMP_RESOURCE+"/update");
+        logger.debug(webTarget
+            .request(APPLICATION_JSON).toString());
+        
+        createTestEmployee("UpdatePhone");
+        String id = getLastEmpId(getAllEmployees());
+        
+        WebTarget getWebTarget = client
+            .register(feature)
+            .target(uri)
+            .path(EMP_RESOURCE+"/" + id);
+        
+        Invocation.Builder getInvocationBuilder = getWebTarget.request(MediaType.APPLICATION_JSON);
+        
+        EmployeePojo emp = getInvocationBuilder.get(EmployeePojo.class);
+        
+        
+        assertNotNull(emp.getCREATED_DATE());
+    }
+    
+    @Test
+    public void test40_test_updationDateOnEmployee() {
+        
+        Client client = ClientBuilder.newClient();
+        URI uri = UriBuilder
+            .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+            .scheme(HTTP_SCHEMA)
+            .host(HOST)
+            .port(PORT)
+            .build();
+        
+        WebTarget getWebTarget = client
+            .register(feature)
+            .target(uri)
+            .path(EMP_RESOURCE+"/1");
+        
+        Invocation.Builder getInvocationBuilder = getWebTarget.request(MediaType.APPLICATION_JSON);
+        
+        EmployeePojo emp = getInvocationBuilder.get(EmployeePojo.class);
+        
+        WebTarget addWebTarget = client.register(feature).target(uri).path(EMP_RESOURCE+"/add");
+        
+        logger.debug(addWebTarget
+            .request(APPLICATION_JSON).toString());
+        
+        emp.setFirstName("JunitUserUpdated");
+        emp.setFirstName("JunitLastUpdated");
+        emp.setEmail("JunitUserUpdated.JunitUserUpdated@test.com");
+
+        
+        Invocation.Builder invocationBuilder = addWebTarget.request(MediaType.APPLICATION_JSON);
+        
+        Response response = invocationBuilder.post(Entity.entity(emp, MediaType.APPLICATION_JSON));
+        
+        String output = response.readEntity(String.class);
+        logger.debug(response.toString());
+        logger.debug(response.toString());
+        assertThat(response.getStatus(), is(200));
+        
+        client = ClientBuilder.newClient();
+        uri = UriBuilder
+            .fromUri(APPLICATION_CONTEXT_ROOT + APPLICATION_API_VERSION)
+            .scheme(HTTP_SCHEMA)
+            .host(HOST)
+            .port(PORT)
+            .build();
+        WebTarget webTarget = client
+            .register(feature)
+            .register(MyObjectMapperProvider.class)
+            .target(uri)
+            .path(EMP_RESOURCE+"/update");
+        logger.debug(webTarget
+            .request(APPLICATION_JSON).toString());
+        
+        createTestEmployee("UpdatePhone");
+        String id = getLastEmpId(getAllEmployees());
+        
+        WebTarget getWebTarget2 = client
+            .register(feature)
+            .target(uri)
+            .path(EMP_RESOURCE+"/" + id);
+        
+        Invocation.Builder getInvocationBuilder2 = getWebTarget2.request(MediaType.APPLICATION_JSON);
+        
+        emp = getInvocationBuilder2.get(EmployeePojo.class);
+        
+        
+        assertNotNull(emp.getUPDATED_DATE());
+
     }
     
 }
