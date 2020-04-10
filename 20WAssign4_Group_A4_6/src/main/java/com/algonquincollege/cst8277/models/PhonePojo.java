@@ -2,8 +2,10 @@
  * File: PhonePojo.java
  * Course materials (20W) CST 8277
  * @author Mike Norman
- * @author Tariq Ali (Secondary)
- * Student# 040 811 012
+ * @author Tariq Ali - 040811012
+ * @author Sirisha Jayampu - 040879561
+ * @author Asha Alphonsa kurian - 040921013
+ * @author Shahrir Ahmed - 040920464
  * (Modified) @date 2020 02
  *
  * Copyright (c) 1998, 2009 Oracle. All rights reserved.

@@ -4,7 +4,10 @@
  * @author Mike Norman
  *
  * @date 2020 03
- *
+ * @author Tariq Ali - 040811012
+ * @author Sirisha Jayampu - 040879561
+ * @author Asha Alphonsa kurian - 040921013
+ * @author Shahrir Ahmed - 040920464
  * TODO - add to this class for Assignment 4
  */
 package com.algonquincollege.cst8277;

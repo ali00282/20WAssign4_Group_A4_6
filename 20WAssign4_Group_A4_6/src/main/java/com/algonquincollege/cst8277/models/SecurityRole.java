@@ -2,7 +2,11 @@
  * File: SecurityRole.java
  * Course materials (20W) CST 8277
  * @author Mike Norman
- *
+ * Group# A4_6
+  * @author Tariq Ali - 040811012
+ * @author Sirisha Jayampu - 040879561
+ * @author Asha Alphonsa kurian - 040921013
+ * @author Shahrir Ahmed - 040920464
  */
 package com.algonquincollege.cst8277.models;
 

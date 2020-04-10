@@ -5,7 +5,10 @@
  * @author Tariq Ali (Secondary)
  * Student# 040 811 012
  * @date 2020 02
- *
+ * @author Tariq Ali - 040811012
+ * @author Sirisha Jayampu - 040879561
+ * @author Asha Alphonsa kurian - 040921013
+ * @author Shahrir Ahmed - 040920464
  */
 package com.algonquincollege.cst8277.models;
 
