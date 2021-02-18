@@ -34,7 +34,7 @@
     <!-- code properties -->
     <jakartaee-api.version>8.0.0</jakartaee-api.version>
     <jakarta.security.enterprise.version>1.0.1</jakarta.security.enterprise.version>
-    <jackson.version>2.10.2</jackson.version>
+    <jackson.version>2.12.1</jackson.version>
     <jersey.version>2.29</jersey.version>
     <jersey.extensions.version>2.29.1</jersey.extensions.version>
     <eclipse.microprofile.version>[1.0,2)</eclipse.microprofile.version>
